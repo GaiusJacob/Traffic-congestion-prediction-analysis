@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Traffic Flow · Random Forest 4-Hour Early Warning</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body>
+<header><div><div class="eyebrow">SMART MOBILITY · LIVE SIMULATION</div><h1>Traffic Flow Prediction &amp; Early Warning</h1>
+<p>Random Forest 4-hour forecast · continuous traffic through gateways · multiple scheduled accidents</p></div>
+<div class="live"><span class="pulse"></span> <span id="liveText">SIMULATION PAUSED</span></div></header>
+<main>
+
+<section class="toolbar panel"><div class="control-copy"><h2>Control room</h2>
+<p>Cars enter and leave through the 8 outer gateways all day. Pick a junction or road on the map, schedule accidents, press start.</p></div>
+<div class="controls">
+<div class="buttons"><button id="playBtn">▶ Start</button><button id="resetBtn" class="ghost">↺ Reset</button></div>
+<label>Speed<select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option><option value="16">16×</option></select></label>
+<label>Traffic demand <input type="range" id="demand" min="0.5" max="2" step="0.1" value="1"></label>
+<label>Driver response<select id="mode"><option value="reactive">React when accident happens</option><option value="early">Act on the 4-hour warning</option></select></label>
+<label class="inline"><input type="checkbox" id="useRf" checked> Route with Random Forest forecast</label>
+</div></section>
+
+<section class="stats">
+<div class="stat panel"><span>CLOCK</span><strong id="sClock">–</strong></div>
+<div class="stat panel"><span>CARS ON MAP</span><strong id="sCars">0</strong></div>
+<div class="stat panel"><span>ENTERED / LEFT</span><strong id="sFlow">0 / 0</strong></div>
+<div class="stat panel"><span>WAITING OUTSIDE</span><strong id="sWait">0</strong></div>
+<div class="stat panel"><span>STUCK NOW</span><strong id="sStuck" class="red">0</strong></div>
+<div class="stat panel"><span>REROUTED</span><strong id="sRe" class="green">0</strong></div>
+<div class="stat panel"><span>AVG DELAY / TRIP</span><strong id="sDelay">0 min</strong></div>
+</section>
+
+<div class="layout">
+<section class="panel map-panel">
+<div class="section-head"><div><h2>Road network</h2><p>Click a <b>junction</b> or a <b>road</b> to choose where the next accident happens.</p></div><div id="badge" class="badge neutral">No accidents scheduled</div></div>
+<div class="layers"><span>Colour roads by:</span><button data-layer="0" class="on">Load now</button><button data-layer="1">Forecast +1 h</button><button data-layer="2">+2 h</button><button data-layer="3">+3 h</button><button data-layer="4">+4 h</button><span id="predClock"></span></div>
+<div class="map-wrap"><canvas id="map" width="1000" height="640" aria-label="Animated traffic network"></canvas></div>
+<div class="legend">
+<span><i class="sq" style="background:#2f8f6b"></i>free</span><span><i class="sq" style="background:#d7c24a"></i>busy</span><span><i class="sq" style="background:#ff4b55"></i>jammed (road colour)</span>
+<span><i class="dot" style="background:#b7d3ee"></i>car</span><span><i class="dot" style="background:#ffb23f"></i>slow car</span><span><i class="dot" style="background:#54d6a0"></i>rerouted</span><span><i class="dot" style="background:#ff5f65"></i>stuck</span>
+<span><i class="dot warning"></i>warning</span><span><i class="dot accident"></i>accident</span></div>
+</section>
+
+<div class="side">
+<section class="panel"><h2>Schedule an accident</h2>
+<div id="picked" class="picked">Nothing selected – click the map.</div>
+<div class="form-grid">
+<label>Starts in (hours)<input type="number" id="fStart" min="0.1" max="48" step="0.5" value="5"></label>
+<label>Lasts (hours)<input type="number" id="fDur" min="0.5" max="12" step="0.5" value="6"></label>
+<label class="wide">Severity<select id="fSev"><option value="1">Full closure (100 %)</option><option value="0.8">Heavy – 80 % capacity lost</option><option value="0.5">Partial – 50 % capacity lost</option></select></label>
+</div>
+<div class="buttons"><button id="addAcc" class="danger" disabled>⚠ Add accident</button><button id="randAcc" class="ghost">🎲 Random accident</button></div>
+<p class="footnote">The warning appears 4 hours before the start (immediately if it starts sooner). Add as many accidents as you like.</p>
+<div id="accList" class="acc-list"></div></section>
+
+<section class="panel"><div class="section-head"><div><h2>Random Forest forecast</h2><p id="fcTitle">Load ratio = cars ÷ capacity</p></div></div><div id="fcBody"></div></section>
+</div>
+</div>
+
+<div class="columns">
+<section class="panel"><h2>Event log</h2><p>Warnings, accidents and rerouting in simulation time.</p><div id="log" class="log" aria-live="polite"></div></section>
+<section class="panel"><h2>About the model</h2><div id="modelBody"><p>Loading…</p></div></section>
+</div>
+
+<section class="panel explainer"><h2>How it works</h2><div class="steps">
+<div><b>01</b><h3>Cars come and go</h3><p>Vehicles appear at an outer gateway, drive a multi-hour route through the junctions and leave through another gateway. Arrivals follow morning and evening rush hours.</p></div>
+<div><b>02</b><h3>4-hour warning</h3><p>Four hours before a scheduled accident the Random Forest is told about it and forecasts how congestion will spread over the next 4 hours.</p></div>
+<div><b>03</b><h3>Stuck or rerouted</h3><p>When the accident starts, cars less than 4 hours from it are stuck in the queue on the approach roads; cars 4 hours or more away are sent on different roads.</p></div></div>
+<p class="disclaimer"><strong>Important:</strong> the accidents are scheduled by you, so the system knows about them in advance. The Random Forest predicts how traffic will <em>react</em> to a known accident, learned from simulated data; it does not predict that a real accident will happen.</p></section>
+</main><footer>Student project prototype · Python Flask + scikit-learn Random Forest + HTML Canvas · Simulated traffic only</footer>
+<script src="{{ url_for('static', filename='app.js') }}"></script></body></html>

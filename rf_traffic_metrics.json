@@ -1,0 +1,72 @@
+{
+  "trained_at": "2026-10-17 04:13",
+  "n_train": 145728,
+  "n_test": 36432,
+  "n_trees": 60,
+  "episodes": 40,
+  "hours": 72,
+  "horizons": [
+    "+1h",
+    "+2h",
+    "+3h",
+    "+4h"
+  ],
+  "mae_rf": [
+    0.0439,
+    0.0535,
+    0.0599,
+    0.0627
+  ],
+  "mae_baseline": [
+    0.055,
+    0.0774,
+    0.0892,
+    0.0974
+  ],
+  "mae_rf_near_accident": [
+    0.0437,
+    0.0546,
+    0.062,
+    0.0658
+  ],
+  "mae_baseline_near_accident": [
+    0.0537,
+    0.0773,
+    0.0901,
+    0.0993
+  ],
+  "n_test_active_roads": 1722,
+  "mae_rf_active_roads": [
+    0.0452,
+    0.0606,
+    0.0691,
+    0.0736
+  ],
+  "mae_baseline_active_roads": [
+    0.0497,
+    0.079,
+    0.0992,
+    0.1128
+  ],
+  "feature_importance": {
+    "load": 0.347,
+    "up_load": 0.233,
+    "hod_cos": 0.071,
+    "hod_sin": 0.056,
+    "road_cap": 0.049,
+    "down_load": 0.042,
+    "road_len": 0.04,
+    "lag1": 0.033,
+    "acc_left": 0.025,
+    "stopped_frac": 0.024,
+    "lag3": 0.02,
+    "lag2": 0.017,
+    "acc_toward": 0.017,
+    "acc_eta": 0.009,
+    "acc_dist": 0.008,
+    "acc_sev": 0.004,
+    "early_policy": 0.004,
+    "acc_active": 0.001
+  },
+  "note": "MAE is in 'load ratio' units (cars on road / road capacity); lower is better."
+}
